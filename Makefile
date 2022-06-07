@@ -19,6 +19,11 @@ define rootfs
 		--hookdir $(BUILDDIR)/alpm-hooks/usr/share/libalpm/hooks/ $(2)
 
 	cp --recursive --preserve=timestamps rootfs/* $(BUILDDIR)/
+	ifeq "$(3)" "pip3"
+		fakechroot -- fakeroot -- chroot $(BUILDDIR) pip3 install --no-cache-dir rst2pdf mako jsonschema https://github.com/mesonbuild/meson/archive/refs/heads/master.zip
+	endif
+
+	cp --recursive --preserve=timestamps --backup --suffix=.pacnew rootfs/* $(BUILDDIR)/
 
 	fakechroot -- fakeroot -- chroot $(BUILDDIR) update-ca-trust
 	fakechroot -- fakeroot -- chroot $(BUILDDIR) sh -c 'pacman-key --init && pacman-key --populate && bash -c "rm -rf etc/pacman.d/gnupg/{openpgp-revocs.d/,private-keys-v1.d/,pubring.gpg~,gnupg.S.}*"'
@@ -60,13 +65,25 @@ $(OUTPUTDIR)/base.tar.zst:
 $(OUTPUTDIR)/base-devel.tar.zst:
 	$(call rootfs,base-devel,base base-devel)
 
+$(OUTPUTDIR)/base-devel-extra.tar.zst:
+	$(call rootfs,base-devel-extra,base base-devel jq openssh git gyp mercurial subversion ninja cmake ragel yasm nasm asciidoc enca gperf unzip p7zip gcc-multilib clang python-pip curl lib32-glib2 wget,pip3)
+
 $(OUTPUTDIR)/Dockerfile.base: $(OUTPUTDIR)/base.tar.zst
 	$(call dockerfile,base)
 
 $(OUTPUTDIR)/Dockerfile.base-devel: $(OUTPUTDIR)/base-devel.tar.zst
 	$(call dockerfile,base-devel)
 
+<<<<<<< HEAD
 # The following is for local builds only, it is not used by the CI/CD pipeline
+=======
+$(OUTPUTDIR)/Dockerfile.base-devel-extra: $(OUTPUTDIR)/base-devel-extra.tar.zst
+	$(call dockerfile,base-devel-extra)
+
+.PHONY: docker-image-base
+image-base: $(OUTPUTDIR)/Dockerfile.base
+	${DOCKER} build -f $(OUTPUTDIR)/Dockerfile.base -t archlinux/archlinux:base $(OUTPUTDIR)
+>>>>>>> 0450825 (add github workflows to build docker)
 
 .PHONY: image-base
 image-base: $(OUTPUTDIR)/Dockerfile.base
@@ -74,4 +91,11 @@ image-base: $(OUTPUTDIR)/Dockerfile.base
 
 .PHONY: image-base-devel
 image-base-devel: $(OUTPUTDIR)/Dockerfile.base-devel
+<<<<<<< HEAD
 	${OCITOOL} build -f $(OUTPUTDIR)/Dockerfile.base-devel -t archlinux/archlinux:base-devel $(OUTPUTDIR)
+=======
+	${DOCKER} build -f $(OUTPUTDIR)/Dockerfile.base-devel -t archlinux/archlinux:base-devel $(OUTPUTDIR)
+
+image-base-devel-extra: $(OUTPUTDIR)/Dockerfile.base-devel-extra
+	${DOCKER} build -f $(OUTPUTDIR)/Dockerfile.base-devel-extra -t ghcr.io/shinchiro/archlinux:base-devel-extra $(OUTPUTDIR)
+>>>>>>> 0450825 (add github workflows to build docker)

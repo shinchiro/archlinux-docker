@@ -1,0 +1,12 @@
+FROM alpine:latest AS verify
+COPY output/rootfs.tar.zst /
+RUN apk add --no-cache tar zstd
+RUN mkdir /rootfs && tar -C /rootfs --extract --file rootfs.tar.zst
+
+FROM scratch AS root
+COPY --from=verify /rootfs/ /
+RUN ldconfig
+ENV LANG=C.UTF-8
+CMD ["/usr/bin/bash"]
+LABEL org.opencontainers.image.source https://github.com/shinchiro/archlinux-docker
+LABEL org.opencontainers.image.description "Custom Arch Linux distro preinstalled with necessary packages to build mpv player"
