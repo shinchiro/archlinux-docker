@@ -1,0 +1,11 @@
+FROM ghcr.io/shinchiro/archlinux:latest AS base
+COPY toolchain.tar.xz /
+RUN tar xvf toolchain.tar.xz
+LABEL org.opencontainers.image.source https://github.com/shinchiro/archlinux-docker
+
+# FROM scratch AS root
+# COPY --from=verify /rootfs/ /
+# RUN ldconfig
+# ENV LANG=C.UTF-8
+# CMD ["/usr/bin/bash"]
+# LABEL org.opencontainers.image.source https://github.com/shinchiro/archlinux-docker
