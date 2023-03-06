@@ -1,0 +1,53 @@
+name: Mirror x265
+defaults:
+  run:
+    shell: bash
+
+on:
+  workflow_dispatch:
+  # schedule:
+  #   - cron: '0 22 * * 4'
+
+jobs:
+  x265-mirror:
+    name: Mirroring x265
+    runs-on: ubuntu-latest
+    steps:
+      - name: Loading x265 repository
+        id: load_x265
+        uses: actions/cache/restore@main
+        with:
+          path: x265
+          key: ${{ runner.os }}-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}
+
+      - name: Cloning x265
+        run: |
+          git config --global fetch.prune true
+          git config --global --add safe.directory $PWD
+          if [ ! -d "x265" ]; then
+            git clone --mirror https://bitbucket.org/multicoreware/x265_git.git x265
+            git -C x265 remote set-url --push origin https://github.com/shinchiro/x265.git
+          fi
+
+      - name: Update and push
+        env:
+          GH_TOKEN: ${{ secrets.X265_TOKEN }}
+        run: |
+          git -C x265 fetch -p origin
+          git -C x265 push --mirror https://shinchiro:$GH_TOKEN@github.com/shinchiro/x265
+
+      - name: Saving x265 repository
+        uses: actions/cache/save@main
+        with:
+          path: x265
+          key: ${{ runner.os }}-${{ github.run_id }}
+
+      - name: Delete older cache
+        if: steps.load_x265.outputs.cache-matched-key != ''
+        env:
+          CACHE_KEY: ${{ steps.load_x265.outputs.cache-matched-key }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          curl -u shinchiro:$GH_TOKEN -s -o /dev/null -X DELETE -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/shinchiro/archlinux-docker/actions/caches?key=$CACHE_KEY
