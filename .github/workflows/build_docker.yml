@@ -28,7 +28,7 @@ jobs:
           mkdir -p build output
           mkdir -vp build/alpm-hooks/usr/share/libalpm/hooks
           mkdir -vp build/var/lib/pacman/ output
-          packages=(base base-devel jq openssh git mercurial subversion ninja cmake ragel yasm nasm asciidoc enca gperf unzip p7zip gcc-multilib llvm clang lld libc++ libc++abi python-cairo python-pip curl lib32-glib2 wget mimalloc ccache)
+          packages=(base base-devel jq openssh git mercurial subversion ninja cmake ragel yasm nasm asciidoc enca gperf unzip p7zip gcc-multilib llvm clang lld libc++ libc++abi python-cairo python-pip curl lib32-glib2 lib32-gcc-libs wget mimalloc ccache)
           find /usr/share/libalpm/hooks -exec ln -sf /dev/null build/alpm-hooks{} \;
           install -Dm644 /usr/share/devtools/pacman.conf.d/extra.conf build/etc/pacman.conf
           cat pacman-conf.d-noextract.conf >> build/etc/pacman.conf
