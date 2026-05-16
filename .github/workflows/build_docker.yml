@@ -35,7 +35,7 @@ jobs:
           cp --recursive --preserve=timestamps --backup --suffix=.pacnew rootfs/* build/
           unshare --map-root-user --map-auto -- pacman -Sy -r build --noconfirm --dbpath build/var/lib/pacman --config build/etc/pacman.conf --noscriptlet --hookdir build/alpm-hooks/usr/share/libalpm/hooks/ ${packages[@]}
           unshare --map-root-user --map-auto -- chroot build update-ca-trust
-          unshare --map-root-user --map-auto -- chroot build bash -c 'echo "nameserver 8.8.8.8" > /etc/resolv.conf && pip3 install --no-cache-dir --upgrade --break-system-packages setuptools rst2pdf mako jsonschema meson==1.9.2'
+          unshare --map-root-user --map-auto -- chroot build bash -c 'echo "nameserver 8.8.8.8" > /etc/resolv.conf && pip3 install --no-cache-dir --upgrade --break-system-packages setuptools rst2pdf mako jsonschema meson'
           unshare --map-root-user --map-auto -- chroot build bash -c 'mkdir -p etc/pacman.d/gnupg && pacman-key --init && pacman-key --populate && rm -rf etc/pacman.d/gnupg/{openpgp-revocs.d/,private-keys-v1.d/,pubring.gpg~,gnupg.S.}*'
           ln -fs /usr/lib/os-release build/etc/os-release
           # add system users
